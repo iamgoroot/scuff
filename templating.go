@@ -49,13 +49,13 @@ func prepareOutput(in string, outputDir string, file string, m JsonMap) *os.File
 	if err != nil {
 		out = file
 	}
-	t, err := makeTemplate("filename", m).Parse(filepath.Base(out))
+	t, err := makeTemplate("filename", m).Parse(out)
 	if err != nil {
 		out = file
 	} else {
 		b := &bytes.Buffer{}
 		t.Execute(b, m)
-		out = filepath.Join(filepath.Dir(out), b.String())
+		out = b.String()
 	}
 
 	log.Println("processing:", out)
