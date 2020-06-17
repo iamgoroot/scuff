@@ -1,0 +1,13 @@
+{
+  "scuff": {
+    "delim": {
+      "left": "[[",
+      "right": "]]"
+    },
+    "out": "./out",
+    "in": "./in"
+  },
+  "project": {
+      "shortName": "project1"
+  }
+}
