@@ -16,17 +16,7 @@ func main() {
 	}
 	flag.Parse()
 	location := flag.Arg(0)
-	if location == "" {
-		location = "scuff.json"
-	}
-	location = relativeTo(wd, location)
-	log.Println("location", location)
-	Scuff(location)
-}
-
-func Scuff(fileJson string) {
-	st, err := os.Stat(fileJson)
-	if err != nil {
+	if location == "-h" {
 		log.Fatal(`
 								Usage:
 										
@@ -48,6 +38,23 @@ func Scuff(fileJson string) {
 									  "shortName": "project1"
 								  }
 								}`, err)
+	}
+	if location == "-v" {
+		log.Println("0.0.0")
+		return
+	}
+	if location == "" {
+		location = "scuff.json"
+	}
+	location = relativeTo(wd, location)
+	log.Println("location", location)
+	Scuff(location)
+}
+
+func Scuff(fileJson string) {
+	st, err := os.Stat(fileJson)
+	if err != nil {
+		log.Println("run it within the directory with scuff.json inside", fileJson, err)
 	}
 	if st.IsDir() {
 		fileJson = filepath.Join(fileJson, "scuff.json")
