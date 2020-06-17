@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "scuff": {
+      "type": "object",
+      "properties": {
+        "delim": {
+          "type": "object",
+          "properties": {
+            "left": {
+              "type": "string"
+            },
+            "right": {
+              "type": "string"
+            }
+          },
+        },
+        "out": {
+          "type": "string"
+        },
+        "in": {
+          "type": "string"
+        }
+      },
+    }
+  },
+}
