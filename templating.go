@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"html/template"
 	"log"
 	"os"
@@ -29,21 +30,11 @@ func walk(in string, out string, m JsonMap) error {
 func execute(in string, outputDir string, file string, m JsonMap, group *sync.WaitGroup) {
 	group.Add(1)
 	defer group.Done()
-	out, err := filepath.Rel(in, file)
-	if err != nil {
-		out = file
-	}
-	log.Println("processing:", out)
-	out = relativeTo(outputDir, out)
-	os.MkdirAll(filepath.Dir(out), os.ModePerm)
-	outfile, err := os.Create(out)
-	if err != nil {
-		log.Fatal(err)
-	}
+	outfile := prepareOutput(in, outputDir, file, m)
 	defer outfile.Close()
 
 	t := makeTemplate(filepath.Base(file), m)
-	t, err = t.ParseFiles(file)
+	t, err := t.ParseFiles(file)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -51,6 +42,30 @@ func execute(in string, outputDir string, file string, m JsonMap, group *sync.Wa
 	if err != nil {
 		log.Println(err)
 	}
+}
+
+func prepareOutput(in string, outputDir string, file string, m JsonMap) *os.File {
+	out, err := filepath.Rel(in, file)
+	if err != nil {
+		out = file
+	}
+	t, err := makeTemplate("filename", m).Parse(filepath.Base(out))
+	if err != nil {
+		out = file
+	} else {
+		b := &bytes.Buffer{}
+		t.Execute(b, m)
+		out = filepath.Join(filepath.Dir(out), b.String())
+	}
+
+	log.Println("processing:", out)
+	out = relativeTo(outputDir, out)
+	os.MkdirAll(filepath.Dir(out), os.ModePerm)
+	outfile, err := os.Create(out)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return outfile
 }
 
 func makeTemplate(name string, m JsonMap) *template.Template {

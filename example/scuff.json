@@ -9,5 +9,8 @@
   },
   "project": {
       "shortName": "project1"
+  },
+  "templated": {
+    "name": "some.file"
   }
 }
