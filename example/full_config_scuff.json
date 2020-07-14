@@ -4,9 +4,13 @@
       "left": "[[",
       "right": "]]"
     },
-    "out": "./out",
-    "in": "./in"
+    "out": "./full_output",
+    "in": "./templates/full",
+    "rewrite": [
+      ""
+    ]
   },
+  "customvalue": "custom_value",
   "project": {
       "shortName": "project1"
   },

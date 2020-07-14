@@ -1,0 +1,6 @@
+{
+  "customvalue": "value",
+  "templated": {
+    "name": "some_name"
+  }
+}

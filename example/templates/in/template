@@ -1,4 +1,4 @@
 this template is rendered wit data from minimal_scuff.json
 * templates/in - default input dir
 * out - default output dir
- value
+ {{ .customvalue }}
