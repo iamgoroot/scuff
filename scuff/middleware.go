@@ -2,11 +2,11 @@ package scuff
 
 import "log"
 
-func (scuff *scuff) Use(data map[string]interface{}) {
-	mergeMaps(scuff.AsMap, data)
+func (f *scuff) Use(data map[string]interface{}) {
+	mergeMaps(f.AsMap, data)
 }
 
-func mergeMaps(into map[string]interface{},from map[string]interface{}) {
+func mergeMaps(into map[string]interface{}, from map[string]interface{}) {
 	for key, v := range from {
 		switch mergeMe := v.(type) {
 		case map[string]interface{}:

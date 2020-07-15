@@ -12,7 +12,7 @@
   },
   "customvalue": "custom_value",
   "project": {
-      "shortName": "project1"
+    "shortName": "project1"
   },
   "templated": {
     "name": "some.file"

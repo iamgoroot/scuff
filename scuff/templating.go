@@ -2,59 +2,48 @@ package scuff
 
 import (
 	"bytes"
-	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"text/template"
 )
 
-func (scuff *scuff) walk() {
-	inputDir, outputDir := scuff.resolvePaths()
-	filepath.Walk(inputDir, func(path string, info os.FileInfo, err error) error {
-		if s, err := os.Stat(path); err == nil {
-			if !s.IsDir() {
-				fmt.Println("found template:", path)
-				scuff.execute(inputDir, outputDir, path)
-			}
-		}
-		return nil
-	})
-}
 
-func (scuff *scuff) execute(inputDir string, outputDir string, file string) {
+
+func (f *scuff) execute(inputDir string, outputDir string, file string) error {
 	outPath, err := filepath.Rel(inputDir, file)
 	if err != nil {
 		outPath = file
 	}
-	outPath = filepath.Join(outputDir, scuff.processText(outPath))
+	outPath = filepath.Join(outputDir, f.processText(outPath))
 	if !filepath.IsAbs(outPath) {
-		outPath = filepath.Join(scuff.Config.Location, outPath)
+		outPath = filepath.Join(f.Config.Location, outPath)
 	}
 	os.MkdirAll(filepath.Dir(outPath), os.ModePerm)
+	log.Println("making", outPath)
 	outfile, err := os.Create(outPath)
 	defer outfile.Close()
 	if handledError("creating file", err) {
-		return
+		return err
 	}
-	t, err := scuff.makeTemplate(filepath.Base(file)).ParseFiles(file)
+	t, err := f.makeTemplate(filepath.Base(file)).ParseFiles(file)
 	if handledError("parsing file", err) {
-		return
+		return err
 	}
-	err = t.Execute(outfile, &scuff.AsMap)
-	handledError("error generating file", err)
+	return t.Execute(outfile, &f.AsMap)
 }
 
-func (scuff *scuff) makeTemplate(name string) *template.Template {
-	return template.New(name).Delims(scuff.Config.Delim.Left, scuff.Config.Delim.Right)
+func (f *scuff) makeTemplate(name string) *template.Template {
+	return template.New(name).Delims(f.Config.Delim.Left, f.Config.Delim.Right)
 }
 
-func (scuff *scuff) processText(text string) string {
-	t, err := scuff.makeTemplate("text").Parse(text)
+func (f *scuff) processText(text string) string {
+	t, err := f.makeTemplate("text").Parse(text)
 	if handledError("parsing error", err, text) {
 		return text
 	}
 	b := &bytes.Buffer{}
-	err = t.Execute(b, &scuff.AsMap)
+	err = t.Execute(b, &f.AsMap)
 	if handledError("failed template processing", err, text) {
 		return text
 	}

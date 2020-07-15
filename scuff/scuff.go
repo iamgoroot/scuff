@@ -4,51 +4,33 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 )
 
-func Fold(jsonFileLocation string) {
+
+func Of(jsonFileLocation string) *scuff {
 
 	data, err := ioutil.ReadFile(jsonFileLocation)
 	if handledError("can't read file", err, jsonFileLocation) {
-		return
+		return nil
 	}
-
-	//get scuff scuff
-	scuff := Scuff(jsonFileLocation, data)
-
-	fmt.Println("folding", scuff.Config.In, "into", scuff.Config.Out)
-	scuff.walk()
+	return OfData(jsonFileLocation, data)
 }
 
-func (scuff *scuff) resolvePaths() (inputDir string, outputDir string) {
-	scuffDir := scuff.Config.Location
-
-	var err error
-	inputDir, err = filepath.Rel(scuffDir, scuff.Config.In)
-	if err != nil {
-		inputDir = scuff.Config.In
-	}
-	outputDir, err = filepath.Rel(scuffDir, scuff.Config.Out)
-	if err != nil {
-		outputDir = scuff.Config.Out
-	}
-	return inputDir, outputDir
-}
-
-func Scuff(location string, data []byte) *scuff {
+func OfData(location string, data []byte) *scuff {
 	if !isDir(location) {
 		location = filepath.Dir(location)
 	}
 	scuff := &scuff{
 		Config: scuffConfig{
 			Location: location,
-			Delim:    delim{
+			Delim: delim{
 				Left:  "{{",
 				Right: "}}",
 			},
-			In:       "./templates/in",
-			Out:      "./out",
+			In:  "./templates/in",
+			Out: "./out",
 			Rewrite: []string{
 				"generated_*",
 			},
@@ -56,11 +38,38 @@ func Scuff(location string, data []byte) *scuff {
 		AsMap: map[string]interface{}{},
 	}
 	err := json.Unmarshal(data, scuff)
-	justLog("invalid scuff scuff section", err)
-
+	justLog("invalid Of Of section", err)
 
 	err = json.Unmarshal(data, &scuff.AsMap)
 
 	justLog("parsing json", err)
 	return scuff
+}
+
+func (f *scuff) Fold() error {
+	inputDir, outputDir := f.resolvePaths()
+	return filepath.Walk(inputDir, func(path string, info os.FileInfo, err error) error {
+		if s, err := os.Stat(path); err == nil {
+			if !s.IsDir() {
+				fmt.Println("found template:", path)
+				f.execute(inputDir, outputDir, path)
+			}
+		}
+		return err
+	})
+}
+
+func (f *scuff) resolvePaths() (inputDir string, outputDir string) {
+	scuffDir := f.Config.Location
+
+	var err error
+	inputDir, err = filepath.Rel(scuffDir, f.Config.In)
+	if err != nil {
+		inputDir = f.Config.In
+	}
+	outputDir, err = filepath.Rel(scuffDir, f.Config.Out)
+	if err != nil {
+		outputDir = f.Config.Out
+	}
+	return inputDir, outputDir
 }
